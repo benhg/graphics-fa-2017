@@ -14,13 +14,11 @@ void polygon(double *x, double *y, int n){
 	G_line(x[i],y[i], x[j], y[j]);	
 	}
 }
-double intersect(double *a, double *b, y){
-	if(a[1] < y && b[1] > y || a[1] > y && b[1] < y){
+double intersect(double *a, double *b, double y){
+	if(a[1] < y && b[1] > y || a[1] > y && b[1]< y){
 	double m = (b[1]-a[1])/(b[0]-a[0]);
 	double off = b[1] - (b[0]*m);
 	return (y-off) / m;
-	}else{
-	  return -1;
 	}
 }
 
@@ -44,7 +42,7 @@ double* sort_double(double *grade, int n){
 }//end sortGrade
 
 void fill_polygon(double *x, double *y, int n){
-  int i, j, k;
+  int j, k,i;
 	for (i=0; i < GRAPHICS_HEIGHT; i++){
 	  double points[n];
 	  double point1[2], point2[2];
@@ -55,10 +53,14 @@ void fill_polygon(double *x, double *y, int n){
 	    val0 = (j+1)%n;
 	    point2[0] = x[val0];
 	    point2[1] = y[val0];
-	    points[j] = intersect(point1, point2, i);
+	    double l;
+	    l=i+.1;
+	    points[j] = intersect(point1, point2, l);
+	    
 	  }
 	  double* sorted;
 	  sorted = sort_double(points, n);
+	  //rmdup(sorted, n);
 	  int l;
 	  for(l=0;l<n;l+=2){
 	    G_line(sorted[l], i, sorted[l+1], i);
@@ -94,19 +96,34 @@ int main(){
     double p_x[100];
     double p_y[100];
     G_fill_rectangle(0,0,50,50);
+    G_fill_rectangle(GRAPHICS_WIDTH-50, 0, GRAPHICS_WIDTH, 50);
     G_fill_rectangle(GRAPHICS_WIDTH-50, GRAPHICS_HEIGHT-50, GRAPHICS_WIDTH, GRAPHICS_HEIGHT);
+    G_fill_rectangle(0, GRAPHICS_HEIGHT-50, 50, GRAPHICS_HEIGHT);
     G_wait_click(p);
     if(p[0] < 50 && p[1] < 50){
       break;
     }
     if(p[0] > GRAPHICS_WIDTH-50 && p[1] >  GRAPHICS_HEIGHT-50){
+      G_rgb(0,0,255);
       fill_polygon(p_x, p_y, num_sides);
+      G_rgb(0,0,0);
       num_sides = 0;
     }
-    if(!(p[0] > GRAPHICS_WIDTH-50) && !( p[1] >  GRAPHICS_HEIGHT-50)){
+    if((p[0] < 50) && ( p[1] >  GRAPHICS_HEIGHT-50)){
+      G_rgb(255,0,0);
+      G_polygon(p_x, p_y, num_sides);
+      G_rgb(0,0,0);
+    }
+    
+    if(!(p[0] > GRAPHICS_WIDTH-50) && !( p[1] >  GRAPHICS_HEIGHT-50) && !(p[0] > GRAPHICS_WIDTH-50) && !( p[1] < 50)){
       p_x[num_sides] = p[0];
       p_y[num_sides] = p[1];
       num_sides+=1;
+    }
+     if(!(p[0] < GRAPHICS_WIDTH-50) && !( p[1] > 50)){
+       G_rgb(255,255,255);
+       G_clear();
+       G_rgb(0,0,0);
     }
 	
     G_point(p[0], p[1]);

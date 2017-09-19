@@ -5,13 +5,13 @@
 double xpt[100];
 int GRAPHICS_HEIGHT;
 int GRAPHICS_WIDTH;
-GRAPHICS_WIDTH = 500,
-    GRAPHICS_HEIGHT = 500;
+GRAPHICS_WIDTH = 1000,
+    GRAPHICS_HEIGHT = 1000;
 
 void selsort(double * xpoi, int poi) {
     int i, j;
     double swap;
-    for (i = 0; i < poi - 1; i++) {
+    for (i = 0; i < poif - 1; i++) {
         for (j = 0; j < poi - i - 1; j++) {
             if (xpoi[j] > xpoi[j + 1]) {
                 swap = xpoi[j];
@@ -36,7 +36,7 @@ void fill_polygon(double * p_x, double * p_y, int n) {
         }
         selsort(xpt, poi);
         for (i = 0; i < poi; i += 2) {
-            G_line(xpt[i], y, xpt[i + 1], y);
+	  G_line(xpt[i], y, xpt[i + 1], y);
         }
     }
 }
@@ -51,22 +51,21 @@ int main() {
     G_init_graphics(GRAPHICS_WIDTH, GRAPHICS_HEIGHT);
     G_rgb(0, 0, 0);
     draw_rectangles();
-    int i, n, j, k, poi;
+    int i, n, j, k, poi, FLAG;
     double y;
     double p[2];
     double p_x[100];
     double p_y[100];
     i = 0;
     n = 0;
-
+    
     while (TRUE) {
 
         G_wait_click(p);
         if (p[0] > GRAPHICS_WIDTH - 50 && p[1] > GRAPHICS_HEIGHT - 50) {
             G_rgb(0, 0, 255);
             fill_polygon(p_x, p_y, n);
-            i = 0;
-            n = 0;
+	    FLAG = 1;
             G_rgb(0, 0, 0);
         }
         if (p[0] < 50 && p[1] < 50) {
@@ -75,8 +74,7 @@ int main() {
         if ((p[0] < 50) && (p[1] > GRAPHICS_HEIGHT - 50)) {
             G_rgb(255, 0, 0);
             G_polygon(p_x, p_y, n);
-            i = 0;
-            n = 0;
+	    FLAG = 1;
             G_rgb(0, 0, 0);
         }
         if (!(p[0] < GRAPHICS_WIDTH - 50) && (p[1] < 50)) {
@@ -88,6 +86,11 @@ int main() {
             draw_rectangles();
         }
         if (!(p[0] > GRAPHICS_WIDTH - 50) && !(p[1] > GRAPHICS_HEIGHT - 50) && !(p[0] > GRAPHICS_WIDTH - 50) && !(p[1] < 50)) {
+	  if (FLAG==1){
+	     i = 0;
+            n = 0;
+	    FLAG = 0;
+	  }
 	    G_fill_rectangle(p[0] - 2, p[1] - 2, 4, 4);
             p_x[i] = p[0];
             p_y[i] = p[1];

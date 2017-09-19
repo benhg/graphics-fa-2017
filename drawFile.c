@@ -26,7 +26,7 @@ void stretch(double sx, double sy, int onum) {
     }
 }
 
-void rotate(double theta, int onum) {
+void rotate(double theta, int onum){
     int i;
     double x_n, y_n;
     translate(-(WIDTH/2),-(HEIGHT/2),onum);
@@ -53,7 +53,8 @@ void draw(int k) {
     }
 }
 
-void load_points(FILE * q, int i,int j,int k,int key, int argc,  char ** argv){
+void load_points(FILE *q, int key, int argc,  char **argv){
+  int i, j, k;
     for (k = 1; k < argc; k++) {
         q = fopen(argv[k], "r");
         if (q == NULL) {
@@ -79,7 +80,7 @@ void load_points(FILE * q, int i,int j,int k,int key, int argc,  char ** argv){
 	    }
 	  }
         }
-	printf("%lf/n", distance);
+	printf("%lf\n", distance);
 	
        	stretch(((WIDTH/(2*distance))),((WIDTH/(2*distance))), k);
 	
@@ -110,12 +111,12 @@ void load_points(FILE * q, int i,int j,int k,int key, int argc,  char ** argv){
 
 int main(int argc, char ** argv) {
     FILE * q;
-    int i, j, k, key;
+    int key;
     G_init_graphics(HEIGHT, WIDTH);
 
     G_rgb(0, 0, 0);
     G_clear();
-    load_points(q,i,j,k,key,argc, argv);
+    load_points(q, key,argc, argv);
     while (1) {
         key = G_wait_key();
         key = key - 48;
@@ -125,7 +126,7 @@ int main(int argc, char ** argv) {
             break;
         }
         draw(key);
-        rotate(0.2, key);
+        rotate(0.05, key);
     }
 
 }
