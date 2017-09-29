@@ -80,7 +80,7 @@ void load_points(FILE *q, int key, int argc,  char **argv){
 	    }
 	  }
         }
-	printf("%lf\n", distance);
+	printf("%lf\n", distance)；
 	
        	stretch(((WIDTH/(2*distance))),((WIDTH/(2*distance))), k);
 	
@@ -117,7 +117,7 @@ int main(int argc, char ** argv) {
     G_rgb(0, 0, 0);
     G_clear();
     load_points(q, key,argc, argv);
-    while (1) {
+    while (TRUE) {
         key = G_wait_key();
         key = key - 48;
         G_rgb(0, 0, 0);
