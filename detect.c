@@ -55,28 +55,19 @@ int main() {
     G_init_graphics(GRAPHICS_WIDTH, GRAPHICS_HEIGHT);
     G_rgb(0, 0, 0);
     draw_rectangles();
-    int i, n, j, k, poi, FLAG;
+    int i, n, j, k, poi, FLAG, FLAG2;
     double y;
     double p[2];
     double p_x[100];
     double p_y[100];
     i = 0;
     n = 0;
-    
     while (TRUE) {
 
         G_wait_click(p);
         if (p[0] > GRAPHICS_WIDTH - 50 && p[1] > GRAPHICS_HEIGHT - 50) {
             G_rgb(0, 0, 255);
-            //fill_polygon(p_x, p_y, n);
-	    if(detect(p)){
-	      G_rgb(0,255,0);
-	    }else{
-	      G_rgb(255,0,0);
-	    }
-	    G_fill_rectangle(p[0] - 2, p[1] - 2, 4, 4);
-	    FLAG = 1;
-            G_rgb(0, 0, 0);
+            fill_polygon(p_x, p_y, n);
         }
         if (p[0] < 50 && p[1] < 50) {
             break;
@@ -85,6 +76,7 @@ int main() {
             G_rgb(255, 0, 0);
             G_polygon(p_x, p_y, n);
 	    FLAG = 1;
+	    FLAG2 = 1;
             G_rgb(0, 0, 0);
         }
         if (!(p[0] < GRAPHICS_WIDTH - 50) && (p[1] < 50)) {
@@ -101,7 +93,19 @@ int main() {
             n = 0;
 	    FLAG = 0;
 	  }
+	  if(FLAG2 == 1){
+	    if(detect(p)){
+	      G_rgb(0,255,0);
+	    }else{
+	      G_rgb(255,0,0);
+	    }
 	    G_fill_rectangle(p[0] - 2, p[1] - 2, 4, 4);
+	    FLAG = 1;in_o
+            G_rgb(0, 0, 0);
+	  }else{
+	     G_fill_rectangle(p[0] - 2, p[1] - 2, 4, 4);
+	  }
+	  
             p_x[i] = p[0];
             p_y[i] = p[1];
             i++;

@@ -1,0 +1,164 @@
+#include <D2d_matrix.h>
+
+  int D2d_print_mat(double m[3][3]) {
+    int i, j;
+    for (i = 0; i < 3; i++) {
+      for (j = 0; j < 3; j++) {
+        printf(" %12.4lf ", m[i][j]);
+      }
+      printf("\n");
+    }
+
+    return 1;
+  }
+
+int D2d_copy_mat(double a[3][3], double b[3][3]) {
+  int i, j;
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
+      a[i][j] = b[i][j];
+    }
+  }
+
+  return 1;
+}
+
+int D2d_make_identity(double a[3][3]){
+    int r, c;
+    for (r = 0; r < 3; r++) {
+      for (c = 0; c < 3; c++) {
+        if (r == c) a[r][c] = 1.0;
+        else a[r][c] = 0.0;
+      }
+    }
+
+    return 1;
+  }
+
+int D2d_mat_mult(double res[3][3], double a[3][3], double b[3][3]) {
+  double t[3][3];
+  int i, j, k;
+  double sum;
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
+      sum = 0;
+      for (k = 0; k < 3; k++) {
+        sum += (a[i][k] * b[k][j]);
+      }
+      t[i][j] = sum;
+    }
+  }
+
+  D2d_copy_mat(res, t);
+  return 1;
+}
+
+int D2d_mat_mult_points(double * X, double * Y, double m[3][3], double * x, double * y, int n) {
+  double temp_x[n];
+  double temp_y[n];
+  int c;
+  for (c = 0; c < n; c++) {
+    temp_x[c] = (m[0][0] * x[c]) + (m[0][1] * y[c]) + (m[0][2] * 1);
+
+  }
+
+  for (c = 0; c < n; c++) {
+    temp_y[c] = (m[1][0] * x[c]) + (m[1][1] * y[c]) + (m[1][2] * 1);
+
+  }
+  
+  for (c = 0; c < n; c++) {
+    X[c] = temp_x[c];
+  }
+
+  for (c = 0; c < n; c++) {
+    Y[c] = temp_y[c];
+  }
+
+  return 1;
+}
+
+int D2d_scale(double a[3][3], double b[3][3], double sx, double sy) {
+  double t[3][3];
+  D2d_make_identity(t);
+
+  t[0][0] = sx;
+  t[1][1] = sy;
+  D2d_mat_mult(a, t, a);
+
+  t[0][0] = (1 / sx);
+  t[1][1] = (1 / sy);
+  D2d_mat_mult(b, b, t);
+
+  return 1;
+}
+
+int D2d_rotate(double a[3][3], double b[3][3], double radians) {
+  double t[3][3];
+  D2d_make_identity(t);
+
+  double cosine = cos(radians);
+  double sine = sin(radians);
+  double negcosine = cos(-1 * radians);
+  double negsine = sin(-1 * radians);
+
+  t[0][0] = cosine;
+  t[0][1] = -1 * sine;
+  t[1][0] = sine;
+  t[1][1] = cosine;
+  D2d_mat_mult(a, t, a);
+
+  t[0][0] = negcosine;
+  t[0][1] = -1 * negsine;
+  t[1][0] = negsine;
+  t[1][1] = negcosine;
+  D2d_mat_mult(b, b, t);
+
+  return 1;
+}
+
+int D2d_negate_x(double a[3][3], double b[3][3]) {
+  double t[3][3];
+  D2d_make_identity(t);
+
+  t[0][0] = -1;
+  t[0][1] = -1;
+  D2d_mat_mult(a, t, a);
+
+  t[0][0] = -1;
+  t[0][1] = -1;
+  D2d_mat_mult(b, b, t);
+
+  return 1;
+}
+
+int D2d_negate_y(double a[3][3], double b[3][3]) {
+  double t[3][3];
+  D2d_make_identity(t);
+
+  t[1][0] = -1;
+  t[1][1] = -1;
+  D2d_mat_mult(a, t, a);
+
+  t[1][0] = -1;
+  t[1][1] = -1;
+  D2d_mat_mult(b, b, t);
+
+  return 1;
+}
+
+int D2d_translate(double a[3][3], double b[3][3], double dx, double dy){
+    double temp[3][3];
+
+    D2d_make_identity(temp);
+
+    temp[0][2] = dx;
+    temp[1][2] = dy;
+    D2d_mat_mult(a, temp, a);
+
+    temp[0][2] = -dx;
+    temp[1][2] = -dy;
+    D2d_mat_mult(b, b, temp);
+
+    return 1;
+  }

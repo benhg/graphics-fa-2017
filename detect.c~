@@ -68,15 +68,7 @@ int main() {
         G_wait_click(p);
         if (p[0] > GRAPHICS_WIDTH - 50 && p[1] > GRAPHICS_HEIGHT - 50) {
             G_rgb(0, 0, 255);
-            //fill_polygon(p_x, p_y, n);
-	    if(detect(p)){
-	      G_rgb(0,255,0);
-	    }else{
-	      G_rgb(255,0,0);
-	    }
-	    G_fill_rectangle(p[0] - 2, p[1] - 2, 4, 4);
-	    FLAG = 1;
-            G_rgb(0, 0, 0);
+            fill_polygon(p_x, p_y, n);
         }
         if (p[0] < 50 && p[1] < 50) {
             break;
@@ -101,7 +93,19 @@ int main() {
             n = 0;
 	    FLAG = 0;
 	  }
+	  if(FLAG == 1){
+	    if(detect(p)){
+	      G_rgb(0,255,0);
+	    }else{
+	      G_rgb(255,0,0);
+	    }
 	    G_fill_rectangle(p[0] - 2, p[1] - 2, 4, 4);
+	    FLAG = 1;
+            G_rgb(0, 0, 0);
+	  }else{
+	     G_fill_rectangle(p[0] - 2, p[1] - 2, 4, 4);
+	  }
+	  
             p_x[i] = p[0];
             p_y[i] = p[1];
             i++;
