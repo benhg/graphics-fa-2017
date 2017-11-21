@@ -17,16 +17,15 @@ int compare (const void *p, const void *q) {
   THING *a, *b;
   a = (THING*)p;
   b = (THING*)q;
-  if  (((*a).dist) < ((*b).dist)) return -1;
-  else if (((*a).dist) > ((*b).dist)) return 1;
+  if  (((*a).dist) < ((*b).dist)) return 1;
+  else if (((*a).dist) > ((*b).dist)) return -1;
   else return 0;
 }
 
-void sortthings() {
- int i, j, q, point;
+void sortit() {
+  int i, j, q, point;
   double d;
   q = 0;
-  printf("numobs = %d\n",numobs) ;
   for(i = 1; i <= numobs; i++) {
     for(j = 0 ; j < numpolys[i]; j++) {
       point = con[i][j][0];
@@ -34,17 +33,15 @@ void sortthings() {
       things[q].objnum = i; things[q].polynum = j; things[q].dist = d;
       q++;
     }
-  }
-  printf("q = %d,  totpolys = %d\n",q,totpolys) ;
-
+  }  
   qsort(things, totpolys, sizeof(THING), compare);
-} 
+}
 
 void halfangle_calc() {
   int i, j;
   double h;
   h = tan(halfangle);
-  for(j=0; j < numobs; j++){
+  for(int j = 1 ; j <= numobs; j++){
     for(i = 0; i < numpoints[j]; i++) {
       xbb[j][i] = ((x[j][i] / z[j][i]) * (300 / h) + 300);
       ybb[j][i] = ((y[j][i] / z[j][i]) * (300 / h) + 300);
@@ -54,20 +51,18 @@ void halfangle_calc() {
 
 void draw() {
 	int i, j, point;
-	sortthings();
+	sortit();
 	halfangle_calc();
-  for(i = totpolys+1; i > 0; i--) {
-    double polyx[9000], polyy[9000];
+  for(i = 0; i < totpolys; i++) {
+    double polyx[9000], polyy[9000],n[3], v[3], a[3], b[3], dotprod, point1, point2, point3;
     for(j = 0; j < psize[things[i].objnum][things[i].polynum]; j++) {
       point = con[things[i].objnum][things[i].polynum][j];
       polyx[j] = xbb[things[i].objnum][point];
       polyy[j] = ybb[things[i].objnum][point];
     }
-    if(things[i].objnum==1){
-      G_rgb(1,0,0);
-    }else if(things[i].objnum==2){
-      G_rgb(0,0,1);
-    }
+
+    
+    G_rgb(things[i].objnum-2, things[i].objnum - 1, things[i].objnum);
     G_fill_polygon(polyx, polyy, psize[things[i].objnum][things[i].polynum]);
     G_rgb(0,0,0);
     G_polygon(polyx, polyy, psize[things[i].objnum][things[i].polynum]);
@@ -148,7 +143,7 @@ int main(int argc,  char **argv) {
   
   halfangle = .5;
   flag = 1;
-  numobs = argc;
+  numobs = argc - 1;
 
   G_init_graphics(600,600);
   G_rgb(0,0,0);
@@ -182,9 +177,10 @@ int main(int argc,  char **argv) {
   draw();
 
   G_wait_key();
-  flipflag=1;
+ 
   k = 1;
-  while (0 == 0) {
+  flipflag=1;
+   while (0 == 0) {
     key = G_wait_key();
     G_rgb(0, 0, 0);
     G_clear(k);
