@@ -1,5 +1,5 @@
 #include <FPT.h>   
-#include "D3d_matrix.h"
+#include <D3d_matrix.h>
 
 int numpoints[10], numpolys[10], flag, numobs, totpolys;
 double x[10][9000], y[10][9000], z[10][9000];
@@ -56,7 +56,7 @@ void normalize(double a[]) {
 }
 
 double color(double intensity, double actrgb[], double ambient, double diffusemax) {
-  double rgb[3], inhrgb; rgb[0] = 1; rgb[1] = 1; rgb[2] = 0;
+  double rgb[3], inhrgb; rgb[0] = 1; rgb[1] = 0; rgb[2] = 0;
   inhrgb = ambient + diffusemax;
   if (intensity < inhrgb) {
     inhrgb = (intensity / inhrgb);
@@ -66,7 +66,7 @@ double color(double intensity, double actrgb[], double ambient, double diffusema
     actrgb[1] = ((1 - rgb[1]) * ((1 - intensity) / (1 - inhrgb))) + rgb[1];
     actrgb[2] = ((1 - rgb[2]) * ((1 - intensity) / (1 - inhrgb))) + rgb[2];
   } else {
-    actrgb[0] = inhrgb * rgb[0]; actrgb[1] = inhrgb * rgb[1]; actrgb[2] = inhrgb * rgb[2]; //is this wrong?
+    actrgb[0] = inhrgb * rgb[0]; actrgb[1] = inhrgb * rgb[1]; actrgb[2] = inhrgb * rgb[2];
   }
 }
 
@@ -75,7 +75,8 @@ void draw() {
 	sortit();
 	prep();
 	double light[3]; light[0] = 100; light[1] = 200; light[2] = 0;
-	double diffusemax, ambient, intensity, specpow, specular, diffuse; diffusemax = .5; ambient = .2; specpow = 30;
+	double diffusemax, ambient, intensity, specpow, specular, diffuse;
+	diffusemax = .6; ambient = .2; specpow = 30;
   for(i = 0; i < totpolys; i++) {  
     double polyx[9000], polyy[9000], n[3], a[3], b[3], l[3], e[3], r[3], nde, ndl, dist, actrgb[3];
     for(j = 0; j < psize[things[i].objnum][things[i].polynum]; j++) {
@@ -91,7 +92,7 @@ void draw() {
     a[0] = (x[k][point2] - x[k][point1]); a[1] = (y[k][point2] - y[k][point1]); a[2] = (z[k][point2] - z[k][point1]);
     b[0] = (x[k][point3] - x[k][point2]); b[1] = (y[k][point3] - y[k][point2]); b[2] = (z[k][point3] - z[k][point2]);    
     l[0] = (light[0] - x[k][point1]); l[1] = (light[1] - y[k][point1]); l[2] = (light[2] - z[k][point1]); normalize(l);
-    e[0] = (0        - x[k][point1]); e[1] = (0        - y[k][point1]); e[2] = (0        - z[k][point1]); normalize(e);
+    e[0] = (0 - x[k][point1]); e[1] = (0 - y[k][point1]); e[2] = (0 - z[k][point1]); normalize(e);
     D3d_x_product(n, a, b); normalize(n);    
     ndl = ((n[0] * l[0]) + (n[1] * l[1]) + (n[2] * l[2]));
     nde = ((n[0] * e[0]) + (n[1] * e[1]) + (n[2] * e[2]));
@@ -199,7 +200,7 @@ int main(int argc,  char **argv) {
   G_init_graphics(600,600);
   G_rgb(0,0,0);
   G_clear();
-
+  
   for(k = 1; k < argc; k++) {
     q = fopen(argv[k], "r");
     if (q == NULL) {
@@ -224,48 +225,81 @@ int main(int argc,  char **argv) {
     }
   }
   
-  G_rgb(1, 0, 0);
+  
+  //special translation for writefile
+  double avgx, avgy, avgz;
+  for(i = 0; i < numpoints[1]; i++) {
+    avgx += x[1][i];
+    avgy += y[1][i];
+    avgz += z[1][i];
+  }
+  avgy = -(avgy / numpoints[1]);
+  avgx = -(avgx / numpoints[1]);
+  avgz = 500 + (avgz / numpoints[1]);
+  translate(avgx, avgy, avgz, 1);
+  
   draw();
-
-  G_wait_key();
- 
+  G_wait_key(); 
   k = 1;
   while (0 == 0) {
     key = G_wait_key();
     G_rgb(0, 0, 0);
     G_clear();
     G_rgb(1, 0, 0);
-    if (key == 'x') {
-      rotx(k, .05);
+     if (key == 'x') {
+      rotx(k, .1);
       draw();
     } else if (key == 'c') {
-      roty(k, .05);
+      roty(k, .1);
       draw();
     } else if (key == 'z') {
-      rotz(k, .05);
+      rotz(k, .1);
       draw();
-    } else if (key == 'a') {
-      translate(-1, 0, 0, k);
+    }else if (key == 'X') {
+      rotx(k, -.1);
       draw();
-    } else if (key == 'd') {
+    } else if (key == 'C') {
+      roty(k, -.1);
+      draw();
+    } else if (key == 'Z') {
+      rotz(k, -.1);
+      draw();
+    }
+    else if (key == 'd' || key == 'D') {
       translate(1, 0, 0, k);
       draw();
-    } else if (key == 'w') {
-      translate(0, 1, 0, k);
+    } else if (key == 'a' || key == 'A') {
+      translate(-1, 0, 0, k);
       draw();
-    } else if (key == 's') {
+    } else if (key == 's' || key == 'S') {
       translate(0, -1, 0, k);
       draw();
-    } else if (key == 'q') {
-      translate(0, 0, -1, k);
+    } else if (key == 'w' || key == 'W') {
+      translate(0, 1, 0, k);
+      prep();
       draw();
-    } else if (key == 'e') {
+    } else if (key == 'q' || key == 'Q') {
       translate(0, 0, 1, k);
       draw();
-    } else if (key > 47 && key < 58) {
+    } else if (key == 'e' || key == 'E') {
+      translate(0, 0, -1, k);
+      draw();
+    }else if(key=='f' || key == 'F'){
+      draw();
+    }else if(key=='y'){
+      break;
+    }
+    else if (key > 47 && key < 58) {
       draw();
       k = (key - 48);
     }
   }
   
 }
+
+
+
+
+
+
+
