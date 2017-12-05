@@ -1,6 +1,8 @@
 #include <FPT.h>   
 #include "D3d_matrix.h"
-
+#define TRUE 1
+#define FALSE !TRUE
+xs
 double x[100], y[100], z[100];
 
 
@@ -46,7 +48,7 @@ int main(int argc,  char **argv) {
   numpts = 0;
   G_fill_circle(P[0], P[1], 2);
   
-  while(1) {
+  while(TRUE) {
     G_wait_click(P);
     if(P[0] < 50 && P[1] < 50) { break; }
     G_fill_circle(P[0], P[1], 2);

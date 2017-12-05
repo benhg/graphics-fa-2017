@@ -70,21 +70,113 @@ double color(double intensity, double actrgb[], double ambient, double diffusema
   }
 }
 
-void draw() {
-	int i, j, point, point1, point2, point3, k;
-	sortit();
-	prep();
-	double light[3]; light[0] = 100; light[1] = 200; light[2] = 0;
-	double diffusemax, ambient, intensity, specpow, specular, diffuse;
-	diffusemax = .6; ambient = .2; specpow = 30;
-  for(i = 0; i < totpolys; i++) {  
-    double polyx[9000], polyy[9000], n[3], a[3], b[3], l[3], e[3], r[3], nde, ndl, dist, actrgb[3];
-    for(j = 0; j < psize[things[i].objnum][things[i].polynum]; j++) {
-      point = con[things[i].objnum][things[i].polynum][j];
-      polyx[j] = xbb[things[i].objnum][point];
-      polyy[j] = ybb[things[i].objnum][point];
-    }    
+int planeclip(double a, double b, double c, double d, double polyx[], double polyy[], double polyz[],
+              int numpts, double resx[], double resy[], double resz[]) {
+  int num, i, j;
+  double x1, y1, z1, x2, y2, z2, x21, y21, z21, den, t, xintsct, yintsct, zintsct, s1, s2;
+  
+  num = 0;
+  for (i = 0; i < numpts; i++) {
+    j = (i + 1) % numpts;
+    x1 = polyx[i]; y1 = polyy[i]; z1 = polyz[i];
+    x2 = polyx[j]; y2 = polyy[j]; z2 = polyz[j];
+    s1 = (a*x1 + b*y1 + c*z1 + d);
+    s2 = (a*x2 + b*y2 + c*z2 + d);
+    if ((s1 >= 0) && (s2 >= 0)) { 
+      //out do nothing    
+    } else if ((s1 < 0) && (s2 < 0)) {
+      resx[num] = x2; resy[num] = y2; resz[num] = z2; num++;
+    } else {      
+      // one is in, the other out, so find the intersection
+      x21 = x2 - x1; y21 = y2 - y1; z21 = z2 - z1;
+      den = a*x21 + b*y21 + c*z21;
+      if (den == 0) continue; 
+      t = -(a*x1 + b*y1 + c*z1 + d) / den;
+      xintsct = x1 + t*x21;
+      yintsct = y1 + t*y21;
+      zintsct = z1 + t*z21;
+      if (s1 < 0) { 
+        // in to out
+        resx[num] = xintsct; resy[num] = yintsct; resz[num] = zintsct; num++;
+      } else  {
+        // out to in
+        resx[num] = xintsct; resy[num] = yintsct; resz[num] = zintsct; num++;
+        resx[num] = x2     ; resy[num] = y2     ; resz[num] = z2     ; num++;
+      }
+    }
+  }
+  return num;
+}
+
+int clip(double polyx[], double polyy[], double polyz[], int numpts) {
+  double hith = 5; double yon = 100; double cent = ((hith + yon) / 2);
+  double a, b, c, d, yh, hh, wx[6], wy[6], wz[6], nx[9000], ny[9000], nz[9000], cross1[3], cross2[3], n[3];
+  int k, m, i;
+  
+  yh = (tan(halfangle) * yon);
+  hh = (tan(halfangle) * hith);
+  wx[0] = yh; wx[1] = yh; wx[2] = -yh; wx[3] = -yh;
+  wy[0] = yh; wy[1] = -yh; wy[2] = -yh; wy[3] = yh;
+  wz[0] = yon; wz[1] = yon; wz[2] = yon; wz[3] = yon;
     
+  for(k = 0 ; k < 4; k++) { 
+    m = k+1; if(m == 4) { m = 0; }
+    cross1[0] = wx[k]; cross1[1] = wy[k]; cross1[2] = wz[k];
+    cross2[0] = wx[m]; cross2[1] = wy[m]; cross2[2] = wz[m];
+    D3d_x_product(n, cross1, cross2);
+    a = n[0]; b = n[1]; c = n[2]; d = 0;
+    if (a*0 + b*0 + c*cent + d > 0) {
+     a = -a; b = -b; c = -c; d = -d;
+    }
+  
+    numpts = planeclip(a, b, c, d, polyx, polyy, polyz, numpts, nx, ny, nz);    
+    for (i = 0 ; i < numpts ; i++) {
+      polyx[i] = nx[i];   polyy[i] = ny[i]; polyz[i] = nz[i];  
+    }
+  }
+  //front and back clips
+  a = 0; b = 0; c = 1; d = -yon;
+  if (a*0 + b*0 + c*cent + d > 0) {
+   a = -a; b = -b; c = -c; d = -d;;
+  }
+  numpts = planeclip(a, b, c, d, polyx, polyy, polyz, numpts, nx, ny, nz);    
+  for (i = 0 ; i < numpts ; i++) {
+    polyx[i] = nx[i];   polyy[i] = ny[i]; polyz[i] = nz[i];  
+  }
+  //again for the front
+  a = 0; b = 0; c = 1; d = -hith;
+  if (a*0 + b*0 + c*cent + d > 0) {
+   a = -a; b = -b; c = -c; d = -d;
+  }
+  numpts = planeclip(a, b, c, d, polyx, polyy, polyz, numpts, nx, ny, nz);    
+  for (i = 0 ; i < numpts ; i++) {
+    polyx[i] = nx[i];   polyy[i] = ny[i]; polyz[i] = nz[i];  
+  }
+  return numpts;
+}
+
+void draw() {
+	int i, j, point, point1, point2, point3, k, nsize, numpts;
+	sortit();
+	double h = tan(halfangle);
+	double light[3]; light[0] = 100; light[1] = 200; light[2] = 0;
+	double diffusemax, ambient, intensity, specpow, specular, diffuse; diffusemax = .5; ambient = .2; specpow = 30;
+  for(i = 0; i < totpolys; i++) {  
+    double polyx[9000], polyy[9000], polyz[9000], n[3], a[3], b[3], l[3], e[3], r[3], nde, ndl, dist, actrgb[3];
+    
+    for(j = 0; j < psize[things[i].objnum][things[i].polynum]; j++) {
+      point = con[things[i].objnum][things[i].polynum][j];      
+      polyx[j] = x[things[i].objnum][point];
+      polyy[j] = y[things[i].objnum][point];
+      polyz[j] = z[things[i].objnum][point];
+    }
+    numpts = clip(polyx, polyy, polyz, psize[things[i].objnum][things[i].polynum]);    
+    for(j = 0; j < numpts; j++) {
+      polyx[j] = ((polyx[j] / polyz[j]) * (300 / h) + 300);
+      polyy[j] = ((polyy[j] / polyz[j]) * (300 / h) + 300);      
+    }
+    
+    //color
     k = (things[i].objnum);
     point1 = con[k][things[i].polynum][0];
     point2 = con[k][things[i].polynum][1];
@@ -115,7 +207,7 @@ void draw() {
     color(intensity, actrgb, ambient, diffusemax);    
     G_rgb(actrgb[0], actrgb[1], actrgb[2]);
     //G_rgb(intensity, intensity, intensity);
-    G_fill_polygon(polyx, polyy, psize[things[i].objnum][things[i].polynum]);
+    G_fill_polygon(polyx, polyy, numpts);
     //G_rgb(0,0,0);
     //G_polygon(polyx, polyy, psize[things[i].objnum][things[i].polynum]);
   }
