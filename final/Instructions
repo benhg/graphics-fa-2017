@@ -1,0 +1,115 @@
+
+    Instructions for the 2016 CS 367 Graphics Final Exam
+
+1.  Login as kepler, password == kepler
+
+2.  Use sftp to download any files you think you might need
+    from your own account.
+
+3.  sftp kepler@simpson1
+    mget *.*   
+
+        you should get the following files :
+
+        drawXYZ.exec
+ 
+        cylinder30_24.xyz
+        cylinder40_96.xyz
+
+        moebius30_24.xyz
+        moebius40_96.xyz
+
+        D3d_matrix.h
+        D3d_matrix.c
+
+        file_output_test.c
+
+    quit  (exit out of sftp)
+    ls    (list your files to make sure you got these)
+
+4.  Disconnect yourself from the internet
+
+5.  The file, drawXYZ.exec is a a program that can render .xyz files.
+    You should test it out by running it on the four .xyz files
+       listed above.
+
+    You can run it via :
+
+    ./drawXYZ.exec
+
+    and it will give you a usage message.
+
+    To display the file, cylinder30_24.xyz  you should
+
+    ./drawXYZ.exec  600 600  100 200 0  cylinder30_24.xyz    1 0 0
+
+    This will create a 600x600 screen, put the light at 100 200 0,
+    load the desired .xyz file, and color it red (1 0 0),
+
+    After that, if you hit the 'y' key it will rotate the object
+    about y, the 'x' key will rotate it about x, and the 'z' key
+    will rotate it about z.  The 'q' key will quit the program.
+
+6.  After looking at all four .xyz files, here are some comments :
+    
+    Each object has been constructed along a circle of radius 100.
+
+    The files cylinder30_24.xyz  and moebius30_24.xyz  have 24
+    polygons, each with a depth of 30.
+
+    The files cylinder40_96.xyz  and moebius40_96.xyz  have 96
+    polygons, each with a depth of 40.
+
+7.  Your task is to write a program that takes as input, FIRST the
+    depth and THEN the number of polygons, and creates the proper
+    moebius.xyz file so that the rendering program can draw it.
+    Your moebius strips should have a "radius" of 100 as in the
+    four .xyz files above.
+
+    Notice that you are to create the moebius strips and not the
+    cylinders.  The cylinders are there for comparison and to 
+    suggest a first step along the way.  Partial credit will
+    be given if you can create the cylinders but not the moebius
+    strips but the goal is to create the moebius strips.
+
+8.  Your program should be named as follows :
+        yourfullnameGF16.c
+    It is important that the name ends with GF16.c
+    and that the GF is capitalized.
+
+9.  When finished, put your name and your computer's name
+    on a strip of paper and leave it on the keyboard.
+
+
+10. If you have forgotten how to output information to a file,
+    you should examine the program in  "file_output_test.c"
+
+    You can compile it via
+
+    cc  file_output_test.c
+
+    and run it via
+
+    ./a.out
+
+    It should produce a file called  "test.xyz"  which you should
+    examine and compare against the program.
+
+11. There could be mild but acceptable variations on how you accomplish
+    this task so you should not obsess on producing files that are 
+    exact replicas of the examples.
+
+
+
+
+
+
+
+
+
+    
+    
+
+
+
+
